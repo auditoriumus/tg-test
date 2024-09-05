@@ -1,0 +1,48 @@
+services:
+    app:
+        image: app-tg-test
+        container_name: app
+        build:
+            context: deployment/app/
+        volumes:
+            - ./:/var/www/html
+        depends_on:
+            - db
+        networks:
+            - tg_net
+
+    nginx:
+        image: nginx-tg-test
+        container_name: nginx
+        build:
+            context: deployment/nginx/
+        volumes:
+            - ./:/var/www/html
+        ports:
+            - "80:80"
+            - "443:443"
+        depends_on:
+            - app
+        networks:
+            - tg_net
+
+    db:
+        container_name: mysql
+        image: mysql
+        restart: always
+        environment:
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+        volumes:
+            - ./deployment/db_data:/var/lib/mysql
+        ports:
+            - "3306:3306"
+        networks:
+            - tg_net
+
+
+networks:
+    tg_net:
+        name: tg_net
+        driver: bridge
+
